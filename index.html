@@ -1949,7 +1949,7 @@ function buildFurniture(force){const md=S.mode,cut=md==="section"?FL+1.3:md==="n
     items.forEach(({f,lv,i,base,ceil})=>{const o=f.kind?furnitureObject(f,base,ceil):f.model&&T.has(f.model)?modelInstance(T.get(f.model),f,base,ceil??roofUnder(f.at[0],f.at[1])-0.05):null;if(!o)return;
       o.userData.ref={lv,i};o.updateMatrixWorld(true);o.traverse(m=>{if(m.isMesh)(Array.isArray(m.material)?m.material:[m.material]).forEach(x=>{cutMat(x);FMATS.add(x);});});
       FBOX.push({box:new THREE.Box3().setFromObject(o),lv,i,o});if(SEL&&SEL.lv===lv&&SEL.i===i)selObj=o;else objs.push(o);});
-    mergeDeep(objs,furnG);if(selObj){selObj.traverse(m=>{if(m.isMesh&&!Array.isArray(m.material))m.customDepthMaterial=cutDepth(m.material);});furnG.add(selObj);selectObj(selObj);}else if(tctl)tctl.detach();
+    mergeDeep(objs,furnG);warmLights();if(selObj){selObj.traverse(m=>{if(m.isMesh&&!Array.isArray(m.material))m.customDepthMaterial=cutDepth(m.material);});furnG.add(selObj);selectObj(selObj);}else if(tctl)tctl.detach();
     if(WK.on)walkWorld();invalidate();});}
 /* több objektum összes hálója világkoordinátában, anyagonként összevonva; a tömörített (kvantált) attribútumokat előbb lebegőpontossá alakítja */
 function mergeDeep(objs,target){const buckets=new Map(),fl=a=>{if(a.array instanceof Float32Array&&!a.normalized&&!a.isInterleavedBufferAttribute)return a;const n=a.count,k=a.itemSize,f=new Float32Array(n*k);
@@ -2078,6 +2078,16 @@ function prewarm(){return PREWARM||(PREWARM=(async()=>{try{
   tmp.traverse(m=>{if(m.isMesh&&!Array.isArray(m.material))tmp.add(Object.assign(new THREE.Mesh(m.geometry,cutDepth(m.material)),{matrixAutoUpdate:false}));});   /* árnyékanyagok is */
   await idle();await renderer.compileAsync(tmp,camera,scene);
   tmp.traverse(m=>{if(m.isMesh&&!MODELGEOS.has(m.geometry))m.geometry.dispose();});}catch(e){console.warn("Előtöltés:",e);}})());}
+
+/* a lámpák fel- és lekapcsolása megváltoztatja a fények számát, és ettől minden árnyaló újrafordulna (hosszú akadás este).
+   Ezért belső nézetben a háttérben előre lefordítja a felkapcsolt változatot is; a three.js anyagonként megtartja mindkettőt.
+   A fények láthatósága csak a fordítás szinkron részéig változik, a képen nem látszik. */
+let warmTok=0;
+async function warmLights(){if(!roomLights.length)return;const tok=++warmTok;await idle();if(tok!==warmTok||!roomLights.length)return;
+  const sets=[...(PHONE&&WK.on?["g","a"].map(lv=>roomLights.map(l=>l.userData.lv===lv)):[roomLights.map(()=>true)]),roomLights.map(()=>false)];
+  for(const set of sets){if(tok!==warmTok)return;const vis=roomLights.map(l=>l.visible);if(set.every((v,i)=>v===vis[i]))continue;
+    roomLights.forEach((l,i)=>l.visible=set[i]);let p;try{p=renderer.compileAsync(scene,camera);}catch(e){}roomLights.forEach((l,i)=>l.visible=vis[i]);
+    try{await p;}catch(e){}await idle();}}
 
 /* ---------- renderelés ---------- */
 let ao=null;
