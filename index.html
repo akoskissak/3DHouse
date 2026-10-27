@@ -1316,7 +1316,7 @@ const ground=new THREE.Mesh(new THREE.PlaneGeometry(400,400),MS.grass);ground.ro
 
 /* ---------- a ház ---------- */
 const house=new THREE.Group();scene.add(house);
-const nightLights=[],roomLights=[],AOHIDE=new Set();
+const nightLights=[],roomLights=[],lampSpots=[],AOHIDE=new Set();let NIGHT=0;
 function clearGroup(g){while(g.children.length){const c=g.children.pop();c.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.isSprite){o.material.map.dispose();o.material.dispose();}AOHIDE.delete(o);});}}
 function addLight(x,y,z,dist,parent){const l=new THREE.PointLight(0xffffff,0,dist,1);   /* lineáris lecsengés: a fizikai (négyzetes) fénynél közelebb áll a korábbi, egyenletesebb esti fényhez */
   l.color.setHex(0xffc887,THREE.LinearSRGBColorSpace);l.position.set(x,y,z);(parent||house).add(l);nightLights.push(l);return l;}
@@ -1327,7 +1327,13 @@ function roomLamps(list,base,top,draw,above,lv){(list||[]).forEach(L=>{let[x,z]=
   if(fx==="ceiling"&&draw)add(new THREE.CylinderGeometry(0.2,0.2,0.05,32),x,ct-0.025,z);
   else if(fx==="pendant"){const sy=Math.min(base+(L.y??2.1),ct-0.4);y=sy-0.12;if(draw){add(new THREE.CylinderGeometry(0.006,0.006,ct-sy,6),x,(ct+sy)/2,z,MS.black);add(new THREE.CylinderGeometry(0.13,0.2,0.18,32),x,sy,z);}}
   else if(fx==="wall"){const[dx,dz]={E:[1,0],W:[-1,0],S:[0,1],N:[0,-1]}[L.face||"S"];y=base+(L.y??2);add(new THREE.BoxGeometry(dx?0.08:0.14,0.22,dx?0.14:0.08),x+dx*0.04,y,z+dz*0.04);x+=dx*0.25;z+=dz*0.25;}
+  if(PHONE){lampSpots.push({x,y,z,r:L.r||5,k:L.i??1,lv});return;}   /* telefonon a lámpák helyét csak feljegyzi, a fényt a közös készlet adja (lightPool) */
   const l=new THREE.PointLight(0xffd6a0,0,L.r||5,2);l.position.set(x,y,z);l.userData.k=L.i??1;l.userData.lv=lv;l.visible=false;house.add(l);roomLights.push(l);});}
+/* telefon: sok pontfény képpontonként túl drága. Sétánál a hozzád legközelebbi 4 lámpa (az adott szinten) kap valódi fényt,
+   a készlet mérete állandó, így mozgás közben csak a helyük és az erősségük változik, újrafordítás nélkül; áttekintő nézetekben nincs pontfény, csak meleg derítés */
+const POOL=4;
+function lightPool(){if(!PHONE||!WK.on||!roomLights.length)return;const lv=WK.y>AF-0.3?"a":"g",d=s=>(s.x-WK.x)**2+(s.z-WK.z)**2,near=lampSpots.filter(s=>s.lv===lv).sort((a,b)=>d(a)-d(b));
+  roomLights.forEach((l,i)=>{const s=near[i];if(s){l.position.set(s.x,s.y,s.z);l.distance=s.r;l.userData.k=s.k;}else l.userData.k=0;l.intensity=NIGHT*l.userData.k*9*LI;});}
 function wallLine(t,a,b,ops,top,bottom){const segs=[];let cur=a;ops.slice().sort((p,q)=>p[0]-q[0]).forEach(o=>{if(o[0]>cur)segs.push([cur,o[0],bottom,top]);segs.push([o[0],o[1],bottom,o[2]]);segs.push([o[0],o[1],o[3],top]);cur=o[1];});if(cur<b)segs.push([cur,b,bottom,top]);
   segs.forEach(s=>{if(s[3]-s[2]<0.005||s[1]-s[0]<0.005)return;box(s[0],s[2],0,s[1],s[3],t,M.wall,PAR);});}
 /* nyílászáró a fal helyi rendszerében: a1–a2 a fal mentén, h1–h2 magasság; o a kifelé mért távolság a falsíktól */
@@ -1427,7 +1433,7 @@ function buildTerrace(){terraceSup();const T=H.terrace;if(!T)return;SUP.forEach(
 
 let info={ridge:0,eave:0,pv:0,max:0};
 /* nézetmódok: closed kész ház (belül sötét tömb), noroof tető nélkül, section földszinti metszet, attic tetőtéri metszet, walk séta (teljes belső tér mindkét szinten) */
-function buildHouse(){clearGroup(house);nightLights.length=0;roomLights.length=0;seed=7;makeMats();
+function buildHouse(){clearGroup(house);nightLights.length=0;roomLights.length=0;lampSpots.length=0;seed=7;makeMats();
   const md=S.mode,full=md==="walk"||md==="attic",CUT=md==="section"?FL+1.30:md==="noroof"?AF:null,TOPW=CUT||EH,above=h=>CUT!==null&&h>CUT;
   prism(offsetRing(()=>-0.02),0,FL,M.plinth,house);
   H.walls.forEach(w=>{if(inRecess(w))return;const d=wdir(w);inFrame(w.a[0],w.a[1],d.x,d.z,()=>box(-0.03,FL-0.02,-0.03,d.len+0.03,FL+0.005,-0.005,MS.steel,PAR));});
@@ -1446,6 +1452,7 @@ function buildHouse(){clearGroup(house);nightLights.length=0;roomLights.length=0
   /* szobalámpák csak belső nézetben: kívülről nézve nincsenek a jelenetben, így nem kerülnek semmibe */
   if(md!=="closed"&&md!=="attic")roomLamps(H.interior&&H.interior.lights,FL,FL+H.levels.ceiling,full,above,"g");
   if(md==="walk"||md==="attic")roomLamps(H.attic&&H.attic.lights,AF,null,md==="walk",h=>md==="attic"&&h>AF+1.3,"a");
+  if(PHONE&&md==="walk"&&lampSpots.length)for(let i=0;i<POOL;i++){const l=new THREE.PointLight(0xffd6a0,0,5,2);l.userData.k=0;l.visible=false;house.add(l);roomLights.push(l);}
   updateInfo();mergeGroup(house);buildFurniture();applySun();}
 
 /* ---------- belső tér a feltöltött alaprajz szerint ---------- */
@@ -1683,7 +1690,8 @@ function applySun(rebuildEnv){const LAT=(H.meta.lat??46)*Math.PI/180,ROT=(H.meta
   scene.fog.color.setRGB(0.80,0.85,0.89).lerp(new THREE.Color(0.89,0.78,0.66),low*0.6*day).lerp(new THREE.Color(0.10,0.13,0.19),1-day);
   const night=1-day;MS.glass.emissiveIntensity=night*(WK.on?0:1.4);walkFill.intensity=WK.on?(0.18+night*0.3)*LI:0;scene.environmentIntensity=WK.on?0.5:1;   /* belül az égbolt fénye nem jut be mindenhonnan: kevesebb égfény, meleg derítés */MS.curtain.emissiveIntensity=night*0.55;MS.lamp.emissiveIntensity=night*3;nightLights.forEach(l=>l.intensity=night*2.4*LI);
   /* belső nézetben, ha sötét van, égnek a szobák lámpái (a fények száma csak a kapcsoláskor változik) */
-  const lit=night>0.05,onLv=PHONE&&WK.on?(WK.y>AF-0.3?"a":"g"):null;roomLights.forEach(l=>{l.visible=lit&&(!onLv||l.userData.lv===onLv);l.intensity=night*l.userData.k*9*LI;});MS.fixture.emissiveIntensity=lit?night*2.2:0;
+  NIGHT=night;const lit=night>0.05;roomLights.forEach(l=>{l.visible=lit;l.intensity=night*l.userData.k*9*LI;});lightPool();
+  if(PHONE&&!WK.on&&S.mode!=="closed")walkFill.intensity=lit?night*0.45*LI:0;MS.fixture.emissiveIntensity=lit?night*2.2:0;
   if(FM)FM.led.emissiveIntensity=lit&&S.mode!=="closed"?0.6+night*2.4:0.6;
   if(rebuildEnv!==false){if(envRT)envRT.dispose();envRT=pmrem.fromScene(envScene,0.02);scene.environment=envRT.texture;}
   const hh=Math.floor(hr),mm=Math.round((hr-hh)*60),t=`${hh}:${String(mm).padStart(2,"0")}`;
@@ -1891,7 +1899,7 @@ function walkStep(dt){const k=WK.keys;let f=(k.KeyW||k.ArrowUp||k.fw?1:0)-(k.Key
     if(!ok)WK.target=null;moved=moved||ok;}
   if(Math.abs(WK.y-WK.ys)>0.002){WK.ys+=(WK.y-WK.ys)*Math.min(1,dt*9);moved=true;}
   camera.position.set(WK.x,WK.ys+1.62,WK.z);camera.rotation.set(WK.pitch,WK.yaw,0,"YXZ");
-  if(moved){const lv=WK.y>AF-0.3?"Tetőtér":WK.y>FL-0.1&&pipt(H.walls.map(w=>w.a),WK.x,WK.z)?"Földszint":"Kert";const el=document.getElementById("walkfloor");if(el.textContent!==lv){el.textContent=lv;if(PHONE&&roomLights.length)applySun(false);}}
+  if(moved){const lv=WK.y>AF-0.3?"Tetőtér":WK.y>FL-0.1&&pipt(H.walls.map(w=>w.a),WK.x,WK.z)?"Földszint":"Kert";const el=document.getElementById("walkfloor");if(el.textContent!==lv)el.textContent=lv;if(NIGHT>0.05)lightPool();}
   return moved;}
 function glassWalk(on){MS.glass.transparent=on;MS.glass.opacity=on?0.2:1;MS.glass.depthWrite=!on;MS.glass.needsUpdate=true;}
 function enterWalk(){if(WK.on)return;cancelPlace();SEL=null;if(tctl)tctl.detach();syncFurnUI();WK.prev={mode:S.mode,p:camera.position.clone(),t:controls.target.clone(),fov:camera.fov};WK.on=true;S.mode="walk";goal=null;
@@ -2084,7 +2092,7 @@ function prewarm(){return PREWARM||(PREWARM=(async()=>{try{
    A fények láthatósága csak a fordítás szinkron részéig változik, a képen nem látszik. */
 let warmTok=0;
 async function warmLights(){if(!roomLights.length)return;const tok=++warmTok;await idle();if(tok!==warmTok||!roomLights.length)return;
-  const sets=[...(PHONE&&WK.on?["g","a"].map(lv=>roomLights.map(l=>l.userData.lv===lv)):[roomLights.map(()=>true)]),roomLights.map(()=>false)];
+  const sets=[roomLights.map(()=>true),roomLights.map(()=>false)];
   for(const set of sets){if(tok!==warmTok)return;const vis=roomLights.map(l=>l.visible);if(set.every((v,i)=>v===vis[i]))continue;
     roomLights.forEach((l,i)=>l.visible=set[i]);let p;try{p=renderer.compileAsync(scene,camera);}catch(e){}roomLights.forEach((l,i)=>l.visible=vis[i]);
     try{await p;}catch(e){}await idle();}}
