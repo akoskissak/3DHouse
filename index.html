@@ -85,6 +85,15 @@ details summary{cursor:pointer;font-size:14px;font-weight:500}
 .hint{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:color-mix(in srgb,var(--sheet) 92%,transparent);border:1px solid var(--line);border-radius:20px;padding:6px 14px;font-size:12.5px;color:var(--ink2);pointer-events:none;white-space:nowrap;transition:opacity .4s;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
 .hint.gone{opacity:0}
 .walkhud{position:absolute;inset:0;pointer-events:none}
+/* mérés és bemutató: sáv a nézet tetején; a bemutató átvezetéseihez fekete áttűnés */
+.ohud{position:absolute;left:10px;top:10px;right:10px;z-index:3;display:flex;gap:8px 10px;align-items:center;flex-wrap:wrap;background:color-mix(in srgb,var(--sheet) 92%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px}
+.ohud .spacer{flex:1}.ohud .btn{padding:4px 10px}
+.thud{overflow:hidden;padding-bottom:9px}.thud .tcap{display:flex;flex-direction:column;line-height:1.3;min-width:0}.thud .tcap b{font-size:15px;font-weight:600}.thud .tcap span{color:var(--ink2);font-size:12.5px}.thud .tcap span:empty{display:none}
+#tourNext{font-size:17px;line-height:1;padding:3px 12px}
+.tprog{position:absolute;left:0;right:0;bottom:0;height:3px;background:color-mix(in srgb,var(--line) 60%,transparent)}.tprog i{display:block;height:100%;width:0;background:var(--accent)}
+.tfade{position:absolute;inset:0;z-index:2;background:#05070a;opacity:0;pointer-events:none;transition:opacity .35s}
+body.touring .walkhud,body.touring #measurehud{display:none!important}
+.views .tourbtn{font-weight:600;color:var(--accent)}
 .walkhud .whelp{position:absolute;left:10px;top:10px;right:10px;display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap;background:color-mix(in srgb,var(--sheet) 92%,transparent);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px;pointer-events:auto}
 .walkhud .whelp span{flex:1;min-width:200px;color:var(--ink2)}
 .walkhud .whelp .wfloor{flex:none;min-width:0;color:var(--ink);font-weight:600;background:var(--hl);border-radius:6px;padding:2px 8px}
@@ -134,13 +143,14 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-bottom-width
 body.placing .stage canvas{cursor:crosshair}
 /* telefon: tömör fejléc egy sorban, a nézetválasztó és a séta gomb egy sorban, nagyobb 3D nézet, kisebb napjárás-sáv a nézet alján */
 @media (max-width:640px){header{padding:8px 12px 6px;flex-wrap:nowrap;gap:8px}.ttl{display:block;flex:1 1 auto;min-width:0}h1{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .hact{flex:none;flex-wrap:nowrap;gap:5px}.hact .btn{padding:6px 9px}#bNew .lbl,#bWalk .lbl{display:none}#bNew svg,#bWalk svg{margin:0}
+  .hact{flex:none;flex-wrap:nowrap;gap:5px}.hact .btn{padding:6px 9px}#bNew .lbl,#bWalk .lbl,#bMeasure .lbl{display:none}#bNew svg,#bWalk svg,#bMeasure svg{margin:0}
   /* görgetéskor csak a 3D nézet marad fent: a két gombsor (4 + 32 + 6 + 34 + 6 px) kicsúszik */
   .viewcol{top:-82px}.views{gap:5px;margin-bottom:6px;padding-bottom:0}.views .btn{height:32px;padding:0 10px;font-size:12.5px}
-  .toolbar{flex-wrap:nowrap;gap:6px;margin-bottom:6px}.toolbar .spacer{display:none}.seg{flex:1;min-width:0}.seg .btn,#bWalk{height:34px}.seg .btn{flex:1;padding:0 4px;font-size:12.5px;white-space:nowrap}#bWalk{flex:none;padding:0 10px}
+  .toolbar{flex-wrap:nowrap;gap:6px;margin-bottom:6px}.toolbar .spacer{display:none}.seg{flex:1;min-width:0}.seg .btn,#bWalk,#bMeasure{height:34px}#bMeasure{flex:none;padding:0 10px}.seg .btn{flex:1;padding:0 4px;font-size:12.5px;white-space:nowrap}#bWalk{flex:none;padding:0 10px}
   .stage{height:52vh!important;height:52svh!important;min-height:240px!important}
   .sunbar{left:6px;right:6px;bottom:6px;padding:4px 8px;gap:8px;flex-wrap:nowrap;font-size:12px}.sunbar .sunread{display:none}.sunbar select{font-size:12px;padding:3px 4px}.sunbar input[type=range]{min-width:0}
   .grid{padding:0 10px 20px}aside .panel{padding:10px 12px}
+  .ohud{left:6px;right:6px;top:6px;flex-wrap:nowrap;gap:6px;padding:5px 8px}#measureMsg,.thud .tcap{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.thud .tcap b,.thud .tcap span{overflow:hidden;text-overflow:ellipsis}.ohud .spacer{display:none}
   .walkhud .whelp span:not(.wfloor){display:none}.walkhud .whelp{justify-content:space-between}.walkpad{bottom:52px;right:8px}.choices,.steps3,.qform{grid-template-columns:1fr}.hint{display:none}.ttl{min-width:0}header p{display:none}}
 
 </style>
@@ -166,8 +176,12 @@ body.placing .stage canvas{cursor:crosshair}
         <button class="btn" data-m="attic" aria-pressed="false" title="A tetőtér alaprajza, metszetben">Tetőtér</button></div>
       <span class="spacer"></span>
       <button class="btn" id="bWalk" aria-pressed="false" title="Sétálj körbe a házban, első személyben"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="13" cy="4" r="2"/><path d="M10 21l2-6 3 3v3M9 12l2-4 4 2 2 3M11 8l-3 1-1 3"/></svg><span class="lbl">Séta a házban</span></button>
+      <button class="btn" id="bMeasure" aria-pressed="false" title="Távolság mérése: kattints két pontra a modellen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17L17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/></svg><span class="lbl">Mérés</span></button>
     </div>
     <div class="stage" id="stage"><div class="loading" id="loading">A ház felépítése…</div>
+      <div class="tfade" id="tourfade" aria-hidden="true"></div>
+      <div class="ohud" id="measurehud" hidden><span id="measureMsg">Kattints az első pontra</span><span class="spacer"></span><button class="btn" id="measureClear">Törlés</button><button class="btn" id="measureDone">Kész</button></div>
+      <div class="ohud thud" id="tourhud" hidden><div class="tcap" aria-live="polite"><b id="tourCap"></b><span id="tourSub"></span></div><span class="spacer"></span><button class="btn" id="tourNext" title="Következő" aria-label="Következő">›</button><button class="btn" id="tourStop">Leállítás</button><div class="tprog"><i id="tourBar"></i></div></div>
       <div class="walkhud" id="walkhud" hidden>
         <div class="whelp"><span class="wfloor" id="walkfloor">Kert</span><span>Kattints a padlóra, és odasétálsz · húzással nézel körbe · <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> vagy nyilak · <kbd>Shift</kbd> gyorsabb</span><button class="btn" id="walkExit">Kilépés (Esc)</button></div>
         <div class="walkpad" id="walkpad" aria-label="Mozgás"><button data-k="fw" aria-label="Előre">▲</button><button data-k="tl" aria-label="Balra fordulás">⟲</button><button data-k="bw" aria-label="Hátra">▼</button><button data-k="tr" aria-label="Jobbra fordulás">⟳</button></div>
@@ -254,6 +268,8 @@ body.placing .stage canvas{cursor:crosshair}
       <tr><td>Nagyítás</td><td>görgő · két ujj csippentése</td></tr>
       <tr><td>Mozgatás</td><td>jobb egérgomb húzása · két ujj húzása</td></tr>
       <tr><td>Séta a házban</td><td>kattints a padlóra, és odasétálsz; húzással nézel körbe; <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> vagy nyilak; a lépcsőn felmehetsz a tetőtérbe; <kbd>Esc</kbd> kilépés</td></tr>
+      <tr><td>Bemutató</td><td>a <b>▶ Bemutató</b> gomb végigvezet a házon kívül és belül; a nézetbe kattintva vagy <kbd>Esc</kbd>-kel megáll ott, ahol éppen jár</td></tr>
+      <tr><td>Mérés</td><td>a vonalzó gomb után kattints két pontra (fal, padló, bútor, kert); a távolság mellett a vízszintes és a magassági eltérést is mutatja; <kbd>Esc</kbd> vagy <b>Kész</b> befejezés</td></tr>
       <tr><td>Belső nézetek</td><td>a modell fölötti gombok: Kész ház, Tető nélkül, Földszint, Tetőtér</td></tr>
       <tr><td>Visszavonás</td><td>a fejléc visszanyíl gombja vagy <kbd>Ctrl</kbd>+<kbd>Z</kbd></td></tr>
       <tr><td>Mentés</td><td>a böngésző mindent megjegyez; fájlba a <b>Házaim</b> fülön menthetsz</td></tr></tbody></table>
@@ -495,6 +511,15 @@ const DEFAULT_HOUSE={
   objects:[{shape:"cyl",at:[0.70,5.90],r:0.25,h:1.5,mat:"white"}],
   stairs:{rises:17,parts:[{type:"run",start:[5.70,6.75],dir:"E",width:0.95,tread:0.26,steps:7,first:1},{type:"landing",rect:[7.52,6.75,8.83,8.74],rise:8},
    {type:"run",start:[7.52,7.79],dir:"W",width:0.95,tread:0.26,steps:8,first:9}]}},
+ /* bemutató: belső nézetek szemmagasságból; at az állás helye, look a két pont, amely felé a nézet lassan elfordul; lv:"a" a tetőtérben */
+ tour:{walk:[
+  {cap:"Nappali",sub:"L alakú sarokkanapé, dohányzóasztal",at:[5.3,4.35],look:[[8.8,3.4],[4.6,1.0]]},
+  {cap:"Étkező és konyha",sub:"asztal hat székkel, mögötte a konyha",at:[3.7,4.0],look:[[5.6,1.4],[1.2,1.0]]},
+  {cap:"Előszoba",sub:"fali fogas a pad fölött, a lépcső",at:[8.0,6.1],look:[[5.9,5.2],[6.0,7.6]]},
+  {cap:"Fürdőszoba",at:[2.75,8.35],look:[[0.6,8.4],[2.3,6.5]]},
+  {cap:"Hálószoba",at:[3.95,9.45],look:[[1.2,10.6],[2.3,12.4]]},
+  {cap:"Gyerekszoba",sub:"ágy, íróasztal az ablak alatt",at:[5.3,9.55],look:[[8.6,9.6],[6.9,12.2]]},
+  {cap:"Tetőtéri szoba",at:[4.45,4.4],lv:"a",look:[[4.6,1.0],[6.8,2.0]]}]},
  /* tetőtér: a terv leírása szerinti helyiségek (két szoba, fürdő, közlekedő) feltételezett elrendezéssel; a tetőtéri padlótól mért magasságok.
     térdfalak és válaszfalak tengelyvonallal, a felső élük a tető alsó síkját követi; a lépcső fölött födémáttörés korláttal */
  attic:{hole:[5.44,6.75,8.83,8.74],
@@ -1707,9 +1732,10 @@ function autoViews(){const w=BB.x1-BB.x0,l=BB.z1-BB.z0,s=Math.max(w,l),y=EH*0.7;
   return[{id:"s",n:"Délről",p:[XM+s*0.55,2.0,BB.z1+s*1.4],t:[XM,y,ZM]},{id:"n",n:"Északról",p:[XM-s*0.5,2.4,BB.z0-s*1.4],t:[XM,y,ZM]},{id:"e",n:"Keletről",p:[BB.x1+s*1.4,2.2,ZM+s*0.4],t:[XM,y,ZM]},
     {id:"w",n:"Nyugatról",p:[BB.x0-s*1.4,2.6,ZM-s*0.3],t:[XM,y,ZM]},{id:"bird",n:"Madártávlat",p:[XM-s*1.5,s*1.9,ZM+s*2.1],t:[XM,1.5,ZM]},{id:"top",n:"Felülről",p:[XM,s*4.5,ZM+0.5],t:[XM,0,ZM]}];}
 function setupViews(first){const list=H.views&&H.views.length?H.views:autoViews(),el=document.getElementById("views");VIEWS={};
-  el.innerHTML=list.map((v,i)=>`<button class="btn" data-v="${esc(v.id)}" aria-pressed="${i===0}">${esc(v.n)}</button>`).join("");
+  el.innerHTML=`<button class="btn tourbtn" id="bTour" title="Automatikus körbevezetés a házon kívül és belül">▶ Bemutató</button>`+list.map((v,i)=>`<button class="btn" data-v="${esc(v.id)}" aria-pressed="${i===0}">${esc(v.n)}</button>`).join("");
+  document.getElementById("bTour").onclick=()=>runTour();
   list.forEach(v=>VIEWS[v.id]=[V(...v.p),V(...v.t)]);
-  el.querySelectorAll(".btn").forEach(b=>b.onclick=()=>{if(WK.on)exitWalk();el.querySelectorAll(".btn").forEach(x=>x.setAttribute("aria-pressed",x===b));const v=VIEWS[b.dataset.v];goal={p:v[0].clone(),t:v[1].clone()};invalidate();});
+  el.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{if(TOUR.on)stopTour();if(WK.on)exitWalk();el.querySelectorAll("[data-v]").forEach(x=>x.setAttribute("aria-pressed",x===b));const v=VIEWS[b.dataset.v];goal={p:v[0].clone(),t:v[1].clone()};invalidate();});
   const v=VIEWS[list[0].id];if(first){camera.position.copy(v[0]);controls.target.copy(v[1]);}else goal={p:v[0].clone(),t:v[1].clone()};}
 controls.addEventListener("start",()=>{goal=null;});
 
@@ -1742,7 +1768,8 @@ function syncUI(){let act=null;PRESETS.forEach(p=>{const on=Object.keys(p.v).eve
 function changed(...what){syncUI();if(what.includes("site")){terraceSup();buildSite();}if(what.includes("house"))buildHouse();if(what.includes("beds")||what.includes("site"))buildBeds();
   if(what.includes("garden"))garden.visible=S.opt.trees;invalidate();save();}
 /* nézetmód: kész ház, tető nélkül, földszinti és tetőtéri metszet; a séta külön mód */
-function syncModeUI(){const hasA=!!(H.attic&&H.roof.type!=="flat");document.querySelectorAll("#modebar [data-m]").forEach(b=>{b.setAttribute("aria-pressed",!WK.on&&b.dataset.m===S.mode);if(b.dataset.m==="attic")b.hidden=!hasA;});
+function syncModeUI(){const hasA=!!(H.attic&&H.roof.type!=="flat"),md=WK.on?"walk":S.mode;
+  if(md!==MEAS.mode){MEAS.mode=md;if(MEAS.list.length||MEAS.a)measClear();}   /* nézetváltáskor a régi mérések (falon át is látszanának) törlődnek */document.querySelectorAll("#modebar [data-m]").forEach(b=>{b.setAttribute("aria-pressed",!WK.on&&b.dataset.m===S.mode);if(b.dataset.m==="attic")b.hidden=!hasA;});
   document.getElementById("bWalk").setAttribute("aria-pressed",WK.on);}
 document.querySelectorAll("#modebar [data-m]").forEach(b=>b.onclick=()=>{if(WK.on)exitWalk();if(S.mode===b.dataset.m)return;S.mode=b.dataset.m;syncModeUI();buildHouse();
   if(S.mode!=="closed"){const s=Math.max(BB.x1-BB.x0,BB.z1-BB.z0)/12.55;goal={p:S.mode==="section"?V(XM+6.9*s,15.5*s,ZM+13.2*s):S.mode==="attic"?V(XM+6.9*s,18.5*s,ZM+13.2*s):V(XM+8.4*s,13*s,ZM+14.2*s),t:V(XM,S.mode==="attic"?AF:0.7,ZM)};}invalidate();});
@@ -1918,7 +1945,7 @@ function exitWalk(){if(!WK.on)return;WK.on=false;S.mode=WK.prev.mode;glassWalk(f
   cv.addEventListener("pointerdown",e=>{if(!WK.on)return;dn={x:e.clientX,y:e.clientY,moved:false};cv.setPointerCapture(e.pointerId);});
   cv.addEventListener("pointermove",e=>{if(!WK.on||!dn)return;const dx=e.clientX-dn.x,dy=e.clientY-dn.y;if(Math.abs(dx)+Math.abs(dy)>3)dn.moved=true;
     WK.yaw-=dx*0.0045;WK.pitch=Math.max(-1.25,Math.min(1.25,WK.pitch-dy*0.0045));dn.x=e.clientX;dn.y=e.clientY;camera.rotation.set(WK.pitch,WK.yaw,0,"YXZ");camMoved();lastMove=performance.now();});
-  cv.addEventListener("pointerup",e=>{if(!WK.on||!dn)return;const click=!dn.moved;dn=null;if(!click)return;
+  cv.addEventListener("pointerup",e=>{if(!WK.on||!dn)return;const click=!dn.moved;dn=null;if(!click||MEAS.on)return;
     const r=cv.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),camera);
     const objs=[ground,...house.children,...street.children,...garden.children.filter(o=>!o.isInstancedMesh)];const hit=ray.intersectObjects(objs,false).find(h=>h.distance<45);
     if(hit){WK.target=[hit.point.x,hit.point.z];invalidate();}});
@@ -2026,7 +2053,7 @@ function renderOwn(){const el=document.getElementById("owncat"),A=H.assets||{},i
 /* kattintás a 3D nézetben: elhelyezés, illetve bútor kijelölése (a forgatástól a kis elmozdulás különbözteti meg) */
 {const cv=renderer.domElement,ray=new THREE.Raycaster();let dn=null;
   cv.addEventListener("pointerdown",e=>{if(!WK.on)dn={x:e.clientX,y:e.clientY};});
-  cv.addEventListener("pointerup",e=>{if(WK.on||!dn||tctl&&tctl.dragging)return;const moved=Math.hypot(e.clientX-dn.x,e.clientY-dn.y)>5;dn=null;if(moved)return;
+  cv.addEventListener("pointerup",e=>{if(WK.on||!dn||tctl&&tctl.dragging)return;const moved=Math.hypot(e.clientX-dn.x,e.clientY-dn.y)>5;dn=null;if(moved||MEAS.on)return;
     const r=cv.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),camera);
     if(PLACE){const objs=[...house.children,ground,...furnG.children,...street.children,...garden.children.filter(o=>!o.isInstancedMesh)],hit=ray.intersectObjects(objs,true).find(h=>h.distance<80&&!(h.object.material&&h.object.material.userData&&h.object.material.userData.cut&&h.point.y>FCUT.value));
       if(hit){let n=furnG.children.includes(hit.object)?hit.object:null;let o=hit.object;while(o&&!n){if(o.parent===furnG)n=o;o=o.parent;}placeAt(hit.point,!!n);}return;}
@@ -2087,6 +2114,99 @@ function prewarm(){return PREWARM||(PREWARM=(async()=>{try{
   await idle();await renderer.compileAsync(tmp,camera,scene);
   tmp.traverse(m=>{if(m.isMesh&&!MODELGEOS.has(m.geometry))m.geometry.dispose();});}catch(e){console.warn("Előtöltés:",e);}})());}
 
+/* ---------- mérés: két pont a modellen, a távolság felirattal (a vonal és a felirat mindig látszik, falon át is) ---------- */
+const MEAS={on:false,a:null,list:[]},measG=new THREE.Group();scene.add(measG);
+const measDot=(()=>{const c=document.createElement("canvas");c.width=c.height=64;const g=c.getContext("2d");g.fillStyle="#fff";g.beginPath();g.arc(32,32,30,0,7);g.fill();g.fillStyle="#F2661B";g.beginPath();g.arc(32,32,21,0,7);g.fill();
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;})();
+const MM={line:new THREE.LineBasicMaterial({color:0xF2661B,depthTest:false,transparent:true}),dot:new THREE.PointsMaterial({map:measDot,size:12,sizeAttenuation:false,depthTest:false,transparent:true,alphaTest:0.3})};
+const measPts=pts=>{const p=new THREE.Points(new THREE.BufferGeometry().setFromPoints(pts),MM.dot);p.renderOrder=11;return p;};
+const measPrev=new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(0,0,0),V(0,0,0)]),MM.line),measMark=measPts([V(0,0,0)]);
+measPrev.renderOrder=10;measPrev.visible=measMark.visible=false;measG.add(measPrev,measMark);
+/* felirat: állandó képernyőméret, a nézet magasságához és látószögéhez igazítva (measScale minden kép előtt) */
+function measLabel(t1,t2){const c=document.createElement("canvas"),g=c.getContext("2d"),f1='600 40px "IBM Plex Sans", system-ui, sans-serif',f2='400 28px "IBM Plex Sans", system-ui, sans-serif';
+  g.font=f1;let w=g.measureText(t1).width;if(t2){g.font=f2;w=Math.max(w,g.measureText(t2).width);}c.width=Math.ceil(w+36);c.height=t2?100:62;
+  g.fillStyle="#F2661B";const r=14,W=c.width,Hc=c.height;g.beginPath();g.moveTo(r,0);g.arcTo(W,0,W,Hc,r);g.arcTo(W,Hc,0,Hc,r);g.arcTo(0,Hc,0,0,r);g.arcTo(0,0,W,0,r);g.fill();
+  g.textAlign="center";g.fillStyle="#fff";g.font=f1;g.fillText(t1,W/2,44);if(t2){g.font=f2;g.globalAlpha=0.92;g.fillText(t2,W/2,84);}
+  const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true,sizeAttenuation:false}));
+  sp.renderOrder=12;sp.userData.px=[W/2,Hc/2];return sp;}
+function measScale(){if(!MEAS.list.length)return;const h=renderer.domElement.clientHeight||1,k=2*Math.tan(camera.fov*Math.PI/360)/h;
+  MEAS.list.forEach(g=>g.children.forEach(o=>{if(o.isSprite)o.scale.set(o.userData.px[0]*k,o.userData.px[1]*k,1);}));}
+const mRay=new THREE.Raycaster();
+const shown=o=>{for(;o;o=o.parent)if(!o.visible)return false;return true;};
+function measHit(e){const cv=renderer.domElement,r=cv.getBoundingClientRect();mRay.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),camera);
+  const objs=[ground,...house.children,...furnG.children,...street.children,...garden.children.filter(o=>!o.isInstancedMesh),bedsG];
+  const h=mRay.intersectObjects(objs,true).find(h=>h.object.isMesh&&!h.object.isInstancedMesh&&h.distance<250&&shown(h.object)&&!(h.object.material&&h.object.material.userData&&h.object.material.userData.cut&&h.point.y>FCUT.value));
+  return h?h.point.clone():null;}
+function measMsg(t){document.getElementById("measureMsg").textContent=t;}
+function measAdd(a,b){const g=new THREE.Group(),ln=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),MM.line);ln.renderOrder=10;g.add(ln,measPts([a,b]));
+  const d=a.distanceTo(b),dh=Math.hypot(b.x-a.x,b.z-a.z),dy=Math.abs(b.y-a.y);
+  const sp=measLabel(fmt(d)+" m",dy>0.05&&dh>0.05?`vízszintesen ${fmt(dh)} · magasság ${fmt(dy)}`:"");sp.position.copy(a).add(b).multiplyScalar(0.5);g.add(sp);measG.add(g);MEAS.list.push(g);return d;}
+function measClear(){MEAS.list.forEach(g=>{g.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.isSprite){o.material.map.dispose();o.material.dispose();}});measG.remove(g);});MEAS.list=[];
+  MEAS.a=null;measPrev.visible=measMark.visible=false;invalidate();}
+function setMeasure(on){if(on&&TOUR.on)stopTour();if(on&&PLACE)cancelPlace();MEAS.on=on;MEAS.a=null;measPrev.visible=measMark.visible=false;if(!on)measClear();
+  document.getElementById("measurehud").hidden=!on;document.getElementById("bMeasure").setAttribute("aria-pressed",on);renderer.domElement.style.cursor=on?"crosshair":"";
+  measMsg(PHONE?"Koppints az első pontra":"Kattints az első pontra");invalidate();}
+{const cv=renderer.domElement;let md=null,hoverT=0;
+  cv.addEventListener("pointerdown",e=>{if(TOUR.on)stopTour();md=MEAS.on?{x:e.clientX,y:e.clientY}:null;},true);
+  cv.addEventListener("pointerup",e=>{if(!MEAS.on||!md)return;const moved=Math.hypot(e.clientX-md.x,e.clientY-md.y)>6;md=null;if(moved)return;const p=measHit(e);if(!p)return;
+    if(!MEAS.a){MEAS.a=p;measMark.geometry.setFromPoints([p]);measMark.visible=true;measMsg(PHONE?"Most koppints a második pontra":"Most kattints a második pontra");}
+    else{const d=measAdd(MEAS.a,p);MEAS.a=null;measMark.visible=measPrev.visible=false;measMsg(PHONE?`${fmt(d)} m`:`${fmt(d)} m · új méréshez kattints újra`);}invalidate();});
+  /* egérrel: az első pont után a vonal követi a mutatót (ritkítva, mert a sugárvetés a teljes házon fut) */
+  cv.addEventListener("pointermove",e=>{if(!MEAS.on||!MEAS.a||e.pointerType!=="mouse"||e.buttons)return;const now=performance.now();if(now-hoverT<60)return;hoverT=now;
+    const p=measHit(e);if(!p)return;measPrev.geometry.setFromPoints([MEAS.a,p]);measPrev.visible=true;measMsg(`${fmt(MEAS.a.distanceTo(p))} m`);invalidate();});
+  document.getElementById("bMeasure").onclick=()=>setMeasure(!MEAS.on);
+  document.getElementById("measureDone").onclick=()=>setMeasure(false);document.getElementById("measureClear").onclick=()=>{measClear();measMsg(PHONE?"Koppints az első pontra":"Kattints az első pontra");};
+  addEventListener("keydown",e=>{if(e.key!=="Escape"||document.querySelector("dialog[open]"))return;
+    if(TOUR.on){stopTour();e.stopImmediatePropagation();e.preventDefault();}else if(MEAS.on){setMeasure(false);e.stopImmediatePropagation();e.preventDefault();}},true);}
+
+/* ---------- bemutató: automatikus körbevezetés (kívülről körbe, tető nélkül szobáról szobára, belül néhány nézet, végül vissza az utcára) ----------
+   A felvételek (shot) egymás után futnak; módváltásnál és a belső nézeteknél fekete áttűnés. A nézetbe kattintás vagy Esc ott állítja meg, ahol éppen jár. */
+const TOUR={on:false,cur:null,t0:0,done:null,skip:false,n:0,i:0};
+const tEase=t=>t*t*(3-2*t),angLerp=(a,b,t)=>a+Math.atan2(Math.sin(b-a),Math.cos(b-a))*t;
+function tourShots(){const D=Math.PI/180,s=Math.max(BB.x1-BB.x0,BB.z1-BB.z0),R=s*1.85*Math.max(1,1.5/camera.aspect),k=s/12.55*Math.max(1,1.3/camera.aspect),sh=[],I=H.interior||{};
+  const orbit=(cap,sub,a0,a1,h0,h1,r0,r1,dur)=>sh.push({mode:"closed",cap,sub,dur,set(t){const a=(a0+(a1-a0)*t)*D,r=r0+(r1-r0)*t;
+    camera.position.set(XM+Math.sin(a)*r,h0+(h1-h0)*t,ZM+Math.cos(a)*r);controls.target.set(XM,FL+2.2,ZM);camera.lookAt(controls.target);}});
+  /* repülés egy nézetpontra, ott lassú körbefordulással a cél körül */
+  const fly=(mode,cap,sub,P,T,dur,ft,drift)=>sh.push({mode,cap,sub,dur,start(cut){this.P0=cut?P.clone():camera.position.clone();this.T0=cut?T.clone():controls.target.clone();},
+    set(t){const e=tEase(Math.min(1,t*dur/ft)),hold=Math.max(0,(t*dur-ft)/(dur-ft)),a=drift*D*(hold-0.5),dx=P.x-T.x,dz=P.z-T.z,
+      Q=V(T.x+dx*Math.cos(a)+dz*Math.sin(a),P.y,T.z-dx*Math.sin(a)+dz*Math.cos(a));camera.position.copy(this.P0).lerp(Q,e);controls.target.copy(this.T0).lerp(T,e);camera.lookAt(controls.target);}});
+  orbit("A ház az utca felől",H.meta.title||"",-30,25,2.6,3.2,R,R*0.92,7);
+  orbit("Bejárat, keletről","",25,95,3.2,3.8,R*0.92,R*0.85,6);
+  orbit("A kert és a terasz","",95,200,3.8,5.5,R*0.85,R*0.9,7);
+  orbit("Madártávlatból","",200,330,5.5,s*1.2,R*0.9,R*1.1,7);
+  /* tető nélkül: áttekintés, majd a helyiségek a legközelebbi szomszéd sorrendjében, felülről, a ház közepe felőli oldalról */
+  const area=r=>parseFloat(String(r.area??"").replace(",",".")),rooms=(I.rooms||[]).filter(r=>!(area(r)<3.5));
+  if(rooms.length){fly("noroof","Földszint","tető nélkül, berendezve",V(XM+8.4*k,13*k,ZM+14.2*k),V(XM,0.7,ZM),3.5,0.1,10);
+    const fr=H.openings.find(o=>o.type==="front"),fw=fr&&H.walls.find(w=>w.id===fr.wall);let cur=[XM,ZM+s];
+    if(fw){const d=wdir(fw),c=(fr.from+fr.to)/2;cur=[fw.a[0]+d.x*c,fw.a[1]+d.z*c];}const left=rooms.slice();while(left.length){left.sort((a,b)=>Math.hypot(a.at[0]-cur[0],a.at[1]-cur[1])-Math.hypot(b.at[0]-cur[0],b.at[1]-cur[1]));const r=left.shift();cur=r.at;
+      let dx=XM-r.at[0],dz=ZM-r.at[1],l=Math.hypot(dx,dz);if(l<0.8){dx=0.5;dz=0.85;l=Math.hypot(dx,dz);}
+      fly("noroof",r.name,isNaN(area(r))?"":`${fmt(area(r))} m²`,V(r.at[0]+dx/l*2.8,FL+8,r.at[1]+dz/l*2.8),V(r.at[0],FL+0.4,r.at[1]),3.3,1.4,10);}}
+  /* belül, szemmagasságból: a ház adataiban megadott nézetek (tour.walk), különben a legnagyobb helyiségek közepéről */
+  const walk=H.tour&&H.tour.walk||rooms.filter(r=>area(r)>=8).sort((a,b)=>area(b)-area(a)).slice(0,3).map(r=>({cap:r.name,at:r.at,yaw:[0,90]}));
+  walk.forEach(w=>{const[x,z]=w.at,yw=q=>Math.atan2(-(q[0]-x),-(q[1]-z)),y0=w.look?yw(w.look[0]):w.yaw[0]*D,y1=w.look?yw(w.look[1]):w.yaw[1]*D;
+    sh.push({mode:"walk",cut:true,cap:w.cap,sub:w.sub||"",dur:w.dur||5,start(){WK.x=x;WK.z=z;WK.y=WK.ys=floorAt(x,z,w.lv==="a"?AF:FL)??FL;WK.target=null;WK.keys={};WK.pitch=w.pitch??-0.12;lightPool();},
+      set(t){WK.yaw=angLerp(y0,y1,tEase(t));camera.position.set(WK.x,WK.ys+1.62,WK.z);camera.rotation.set(WK.pitch,WK.yaw,0,"YXZ");}});});
+  const v0=Object.values(VIEWS)[0];
+  if(v0)sh.push({mode:"closed",cut:true,cap:"Vége a bemutatónak",sub:"forgasd, nézz körül szabadon",dur:2.5,set(){camera.position.copy(v0[0]);controls.target.copy(v0[1]);camera.lookAt(controls.target);}});
+  return sh;}
+const tFade=v=>new Promise(r=>{document.getElementById("tourfade").style.opacity=v;setTimeout(r,reduce?0:380);});
+function tourMode(m){if(m==="walk"){if(!WK.on)enterWalk();return;}if(WK.on){WK.prev.mode=m;exitWalk();}if(S.mode!==m){S.mode=m;syncModeUI();buildHouse();}goal=null;}
+async function runTour(){if(TOUR.on)return;if(MEAS.on)setMeasure(false);if(PLACE)cancelPlace();if(SEL)select(null);
+  const shots=tourShots();TOUR.on=true;TOUR.n=shots.length;document.body.classList.add("touring");document.getElementById("tourhud").hidden=false;controls.enabled=false;goal=null;
+  for(let i=0;i<shots.length&&TOUR.on;i++){const sh=shots[i],cut=i===0||sh.cut||sh.mode!==(WK.on?"walk":S.mode);TOUR.i=i;
+    if(cut){await tFade(1);if(!TOUR.on)break;tourMode(sh.mode);controls.enabled=false;}
+    document.getElementById("tourCap").textContent=sh.cap;document.getElementById("tourSub").textContent=sh.sub;
+    if(sh.start)sh.start(cut);sh.set(0);TOUR.cur=sh;TOUR.t0=performance.now();invalidate();if(cut)tFade(0);
+    await new Promise(r=>TOUR.done=r);}
+  TOUR.on=false;TOUR.cur=null;document.body.classList.remove("touring");document.getElementById("tourhud").hidden=true;document.getElementById("tourfade").style.opacity=0;
+  if(!WK.on){controls.enabled=true;controls.update();}invalidate();}
+/* a képkocka-ciklusból: az aktuális felvétel kamerája az eltelt idő szerint */
+function tourStep(now){const sh=TOUR.cur;if(!sh)return false;const t=Math.min(1,(now-TOUR.t0)/(sh.dur*1000));sh.set(TOUR.skip?1:t);
+  document.getElementById("tourBar").style.width=((TOUR.i+(TOUR.skip?1:t))/TOUR.n*100).toFixed(1)+"%";
+  if(t>=1||TOUR.skip){TOUR.skip=false;TOUR.cur=null;const d=TOUR.done;TOUR.done=null;if(d)d();}return true;}
+function stopTour(){if(!TOUR.on)return;TOUR.on=false;TOUR.skip=false;TOUR.cur=null;const d=TOUR.done;TOUR.done=null;if(d)d();}   /* a kamera ott marad, ahol éppen jár */
+document.getElementById("tourStop").onclick=stopTour;document.getElementById("tourNext").onclick=()=>{if(TOUR.cur)TOUR.skip=true;};
+
 /* a lámpák fel- és lekapcsolása megváltoztatja a fények számát, és ettől minden árnyaló újrafordulna (hosszú akadás este).
    Ezért belső nézetben a háttérben előre lefordítja a felkapcsolt változatot is; a three.js anyagonként megtartja mindkettőt.
    A fények láthatósága csak a fordítás szinkron részéig változik, a képen nem látszik. */
@@ -2104,7 +2224,7 @@ function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)retur
 function initAO(){if(!SSAOPass)return;try{const z=aoSize();ao=new SSAOPass(scene,camera,z[0],z[1]);ao.kernelRadius=0.55;ao.minDistance=0.00002;ao.maxDistance=0.0018;}catch(e){ao=null;}}
 /* a sarkok árnyalása visszafogottan (AO_MAX) és megállás után fokozatosan erősödve; a fokozás képkockái a már kiszámolt árnyalást használják újra */
 const AO_MAX=0.35,AO_FADE=450;let aoMix=null;
-function renderFrame(hq=true,k=1,reuse=false){if(shadowsDirty){renderer.shadowMap.needsUpdate=true;shadowsDirty=false;}renderer.setRenderTarget(null);renderer.render(scene,camera);
+function renderFrame(hq=true,k=1,reuse=false){measScale();if(shadowsDirty){renderer.shadowMap.needsUpdate=true;shadowsDirty=false;}renderer.setRenderTarget(null);renderer.render(scene,camera);
   if(!hq||!ao||!S.opt.ao||WK.on)return;   /* sétánál közelről az árnyalás elmosódna */
   if(!aoMix)aoMix=new THREE.ShaderMaterial({uniforms:{tDiffuse:{value:null},strength:{value:1}},depthTest:false,depthWrite:false,transparent:true,blending:THREE.CustomBlending,blendSrc:THREE.DstColorFactor,blendDst:THREE.ZeroFactor,blendSrcAlpha:THREE.DstAlphaFactor,blendDstAlpha:THREE.ZeroFactor,
     vertexShader:"varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
@@ -2136,6 +2256,7 @@ let lastT=performance.now();
 /* mozgás közben a sarkok árnyalása (SSAO) kimarad; megállás után 0,2 s-mal egy teljes minőségű kép készül */
 let lastMove=0,lowQ=false,aoT0=-1e9;
 const LOOP=()=>{const now=performance.now(),dt=Math.min(0.05,(now-lastT)/1000);lastT=now;let moving=false;
+  if(TOUR.on&&tourStep(now)){dirty=true;moving=true;}
   if(WK.on){if(walkStep(dt)){dirty=true;moving=true;}}
   else{if(goal){const k=reduce?1:0.09;camera.position.lerp(goal.p,k);controls.target.lerp(goal.t,k);if(camera.position.distanceTo(goal.p)<0.02)goal=null;dirty=true;moving=true;}
     if(controls.update()){dirty=true;moving=true;}if(tctl&&tctl.dragging)moving=true;}
