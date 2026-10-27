@@ -1204,7 +1204,7 @@ const PRESETS=[
 const ACK=["met","sur","sh","steel","porch","beds"];
 
 /* ---------- tervezési állapot: homlokzat és részletek; ebből épül a modell, ezt menti a program ---------- */
-const DEF_OPT={terr:true,pv:true,trees:true,sur:false,met:false,steel:true,porch:true,beds:true,sh:false,rol:false,hide:true,ao:!PHONE};
+const DEF_OPT={terr:true,pv:false,trees:true,sur:false,met:false,steel:true,porch:true,beds:true,sh:false,rol:false,hide:true,ao:!PHONE};
 const S={facade:Object.assign({},PRESETS[0].v),opt:Object.assign({},DEF_OPT),mode:"closed"};
 const get=k=>OPT[k].find(o=>o.id===S.facade[k])||OPT[k][0];
 
@@ -2104,6 +2104,8 @@ renderer.domElement.addEventListener("webglcontextrestored",invalidate);
 /* ---------- indulás: mindig az eredeti ház, a legutóbbi megjelenéssel; ha legutóbb más ház volt nyitva, felajánlja ---------- */
 const LAST=store.get(KEY);
 if(LAST&&LAST.design){S.facade=Object.assign({},S.facade,LAST.design.facade);S.opt=Object.assign({},DEF_OPT,LAST.design.opt);}
+/* a napelemek alapból nincsenek fent; a korábban mentett megjelenésből egyszer kikapcsolja, utána a felhasználó választása marad */
+if(!store.get("haz3d:pvoff")){S.opt.pv=false;store.set("haz3d:pvoff",1);}
 if(LAST&&LAST.house){const L=store.get(LKEY)||[];try{const h=normalizeHouse(LAST.house);if(!L.some(e=>e.id===h.id)){L.unshift({id:h.id,title:h.meta.title,date:new Date().toISOString(),house:h,design:LAST.design});store.set(LKEY,L);}LAST.last=h.id;}catch(e){}}   /* korábbi mentési forma átvétele */
 setHouse(DEFAULT_HOUSE);
 houseTexts();setupViews(true);syncUI();syncModeUI();renderVariants();renderHouses();renderOwn();showTab(store.get("haz3d:tab")||"look");
