@@ -132,7 +132,16 @@ body.walking .hint{display:none}
 kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:var(--sheet)}
 .catgrp{margin-top:10px}.catgrp:first-child{margin-top:0}.catrow{display:flex;flex-wrap:wrap;gap:5px}.btn.cat{font-size:12.5px;padding:5px 9px}
 body.placing .stage canvas{cursor:crosshair}
-@media (max-width:640px){.walkhud .whelp span:not(.wfloor){display:none}.walkhud .whelp{justify-content:space-between}.walkpad{bottom:92px;right:10px}.choices,.steps3,.qform{grid-template-columns:1fr}.hint{display:none}.ttl{min-width:0}header p{display:none}}
+/* telefon: tömör fejléc egy sorban, a nézetválasztó és a séta gomb egy sorban, nagyobb 3D nézet, kisebb napjárás-sáv a nézet alján */
+@media (max-width:640px){header{padding:8px 12px 6px;flex-wrap:nowrap;gap:8px}.ttl{display:block;flex:1 1 auto;min-width:0}h1{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hact{flex:none;flex-wrap:nowrap;gap:5px}.hact .btn{padding:6px 9px}#bNew .lbl,#bWalk .lbl{display:none}#bNew svg,#bWalk svg{margin:0}
+  /* görgetéskor csak a 3D nézet marad fent: a két gombsor (4 + 32 + 6 + 34 + 6 px) kicsúszik */
+  .viewcol{top:-82px}.views{gap:5px;margin-bottom:6px;padding-bottom:0}.views .btn{height:32px;padding:0 10px;font-size:12.5px}
+  .toolbar{flex-wrap:nowrap;gap:6px;margin-bottom:6px}.toolbar .spacer{display:none}.seg{flex:1;min-width:0}.seg .btn,#bWalk{height:34px}.seg .btn{flex:1;padding:0 4px;font-size:12.5px;white-space:nowrap}#bWalk{flex:none;padding:0 10px}
+  .stage{height:52vh!important;height:52svh!important;min-height:240px!important}
+  .sunbar{left:6px;right:6px;bottom:6px;padding:4px 8px;gap:8px;flex-wrap:nowrap;font-size:12px}.sunbar .sunread{display:none}.sunbar select{font-size:12px;padding:3px 4px}.sunbar input[type=range]{min-width:0}
+  .grid{padding:0 10px 20px}aside .panel{padding:10px 12px}
+  .walkhud .whelp span:not(.wfloor){display:none}.walkhud .whelp{justify-content:space-between}.walkpad{bottom:52px;right:8px}.choices,.steps3,.qform{grid-template-columns:1fr}.hint{display:none}.ttl{min-width:0}header p{display:none}}
 
 </style>
 </head>
@@ -143,7 +152,7 @@ body.placing .stage canvas{cursor:crosshair}
     <button class="btn icon" id="bUndo" title="Visszavonás (Ctrl+Z)" aria-label="Visszavonás" disabled><svg viewBox="0 0 24 24" aria-hidden="true" style="margin:0"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg></button>
     <button class="btn icon" id="bRedo" title="Újra (Ctrl+Shift+Z)" aria-label="Újra" disabled><svg viewBox="0 0 24 24" aria-hidden="true" style="margin:0"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 000 12h3"/></svg></button>
     <button class="btn" id="bHelp">Súgó</button>
-    <button class="btn primary" id="bNew"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Új ház</button>
+    <button class="btn primary" id="bNew"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">Új ház</span></button>
   </div>
 </header>
 <main class="grid">
@@ -156,7 +165,7 @@ body.placing .stage canvas{cursor:crosshair}
         <button class="btn" data-m="section" aria-pressed="false" title="Vízszintes metszet 1,30 m-en, mint egy alaprajz">Földszint</button>
         <button class="btn" data-m="attic" aria-pressed="false" title="A tetőtér alaprajza, metszetben">Tetőtér</button></div>
       <span class="spacer"></span>
-      <button class="btn" id="bWalk" aria-pressed="false" title="Sétálj körbe a házban, első személyben"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="13" cy="4" r="2"/><path d="M10 21l2-6 3 3v3M9 12l2-4 4 2 2 3M11 8l-3 1-1 3"/></svg>Séta a házban</button>
+      <button class="btn" id="bWalk" aria-pressed="false" title="Sétálj körbe a házban, első személyben"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="13" cy="4" r="2"/><path d="M10 21l2-6 3 3v3M9 12l2-4 4 2 2 3M11 8l-3 1-1 3"/></svg><span class="lbl">Séta a házban</span></button>
     </div>
     <div class="stage" id="stage"><div class="loading" id="loading">A ház felépítése…</div>
       <div class="walkhud" id="walkhud" hidden>
@@ -1091,7 +1100,9 @@ let seed=7;const rnd=()=>{seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,
 /* ---------- renderelő; csak akkor rajzol újra, ha valami változott ---------- */
 let renderer;try{renderer=new THREE.WebGLRenderer({antialias:true});}
 catch(e){stage.innerHTML='<p class="fallback">A böngésző nem tud 3D grafikát (WebGL) megjeleníteni. Kapcsold be a hardveres gyorsítást a böngésző beállításaiban, vagy nyisd meg egy másik böngészőben.</p>';throw e;}
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));   /* nagy felbontású kijelzőn 1,5×: a pixelek száma közel a felére esik, alig látható különbséggel */
+/* telefonon könnyebb: kevesebb fűcsomó, alapból nincs sarokárnyalás (SSAO), sétánál csak az aktuális szint lámpái égnek */
+const PHONE=/Mobi|Android|iPhone|iPod/i.test(navigator.userAgent)||(matchMedia("(pointer:coarse)").matches&&Math.min(screen.width,screen.height)<820);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,PHONE?1.25:1.5));   /* nagy felbontású kijelzőn 1,5×: a pixelek száma közel a felére esik, alig látható különbséggel */
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=0.6;renderer.localClippingEnabled=true;
 stage.appendChild(renderer.domElement);
@@ -1109,7 +1120,7 @@ const envScene=new THREE.Scene();const envSky=new Sky();envSky.scale.setScalar(1
 const pmrem=new THREE.PMREMGenerator(renderer);let envRT=null;
 [sky,envSky].forEach(s=>{const u=s.material.uniforms;u.turbidity.value=5;u.rayleigh.value=1.4;u.mieCoefficient.value=0.004;u.mieDirectionalG.value=0.82;});
 const hemi=new THREE.HemisphereLight(0xffffff,0xffffff,0.25*LI);hemi.groundColor.setHex(0x5b6648,THREE.LinearSRGBColorSpace);scene.add(hemi);
-const sun=new THREE.DirectionalLight(0xffffff,2.4*LI);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);if(!/Mobi|Android/i.test(navigator.userAgent)&&renderer.capabilities.maxTextureSize>=8192)sun.shadow.mapSize.set(4096,4096);
+const sun=new THREE.DirectionalLight(0xffffff,2.4*LI);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);if(!PHONE&&renderer.capabilities.maxTextureSize>=8192)sun.shadow.mapSize.set(4096,4096);
 Object.assign(sun.shadow.camera,{left:-19,right:19,top:19,bottom:-19,near:1,far:120});sun.shadow.bias=-0.0004;sun.shadow.normalBias=0.025;
 scene.add(sun);scene.add(sun.target);
 const walkFill=new THREE.AmbientLight(0xffe4c4,0);scene.add(walkFill);   /* sétánál este a szobák derítőfénye */
@@ -1193,7 +1204,7 @@ const PRESETS=[
 const ACK=["met","sur","sh","steel","porch","beds"];
 
 /* ---------- tervezési állapot: homlokzat és részletek; ebből épül a modell, ezt menti a program ---------- */
-const DEF_OPT={terr:true,pv:true,trees:true,sur:false,met:false,steel:true,porch:true,beds:true,sh:false,rol:false,hide:true,ao:true};
+const DEF_OPT={terr:true,pv:true,trees:true,sur:false,met:false,steel:true,porch:true,beds:true,sh:false,rol:false,hide:true,ao:!PHONE};
 const S={facade:Object.assign({},PRESETS[0].v),opt:Object.assign({},DEF_OPT),mode:"closed"};
 const get=k=>OPT[k].find(o=>o.id===S.facade[k])||OPT[k][0];
 
@@ -1311,12 +1322,12 @@ function addLight(x,y,z,dist,parent){const l=new THREE.PointLight(0xffffff,0,dis
   l.color.setHex(0xffc887,THREE.LinearSRGBColorSpace);l.position.set(x,y,z);(parent||house).add(l);nightLights.push(l);return l;}
 /* szobák lámpái: valódi pontfények lámpatesttel (mennyezeti, függő, fali vagy csak fény), belső nézetben sötétedéskor kapcsolnak fel.
    base a szint padlója, top a mennyezet (tetőtérben a tető alja); a lámpatest csak ott látszik, ahol a mennyezet is megépül (draw) */
-function roomLamps(list,base,top,draw,above){(list||[]).forEach(L=>{let[x,z]=L.at;const ct=top??roofUnder(x,z)-0.3,fx=L.fix||(top==null?"pendant":"ceiling");let y=L.y!=null?base+L.y:ct-0.3;
+function roomLamps(list,base,top,draw,above,lv){(list||[]).forEach(L=>{let[x,z]=L.at;const ct=top??roofUnder(x,z)-0.3,fx=L.fix||(top==null?"pendant":"ceiling");let y=L.y!=null?base+L.y:ct-0.3;
   const add=(geo,px,py,pz,m)=>{if(above(py))return;const me=new THREE.Mesh(geo,m||MS.fixture);me.position.set(px,py,pz);house.add(me);};
   if(fx==="ceiling"&&draw)add(new THREE.CylinderGeometry(0.2,0.2,0.05,32),x,ct-0.025,z);
   else if(fx==="pendant"){const sy=Math.min(base+(L.y??2.1),ct-0.4);y=sy-0.12;if(draw){add(new THREE.CylinderGeometry(0.006,0.006,ct-sy,6),x,(ct+sy)/2,z,MS.black);add(new THREE.CylinderGeometry(0.13,0.2,0.18,32),x,sy,z);}}
   else if(fx==="wall"){const[dx,dz]={E:[1,0],W:[-1,0],S:[0,1],N:[0,-1]}[L.face||"S"];y=base+(L.y??2);add(new THREE.BoxGeometry(dx?0.08:0.14,0.22,dx?0.14:0.08),x+dx*0.04,y,z+dz*0.04);x+=dx*0.25;z+=dz*0.25;}
-  const l=new THREE.PointLight(0xffd6a0,0,L.r||5,2);l.position.set(x,y,z);l.userData.k=L.i??1;l.visible=false;house.add(l);roomLights.push(l);});}
+  const l=new THREE.PointLight(0xffd6a0,0,L.r||5,2);l.position.set(x,y,z);l.userData.k=L.i??1;l.userData.lv=lv;l.visible=false;house.add(l);roomLights.push(l);});}
 function wallLine(t,a,b,ops,top,bottom){const segs=[];let cur=a;ops.slice().sort((p,q)=>p[0]-q[0]).forEach(o=>{if(o[0]>cur)segs.push([cur,o[0],bottom,top]);segs.push([o[0],o[1],bottom,o[2]]);segs.push([o[0],o[1],o[3],top]);cur=o[1];});if(cur<b)segs.push([cur,b,bottom,top]);
   segs.forEach(s=>{if(s[3]-s[2]<0.005||s[1]-s[0]<0.005)return;box(s[0],s[2],0,s[1],s[3],t,M.wall,PAR);});}
 /* nyílászáró a fal helyi rendszerében: a1–a2 a fal mentén, h1–h2 magasság; o a kifelé mért távolság a falsíktól */
@@ -1433,8 +1444,8 @@ function buildHouse(){clearGroup(house);nightLights.length=0;roomLights.length=0
   if(CUT)buildInside(CUT);
   else{if(full){buildInside(FL+H.levels.ceiling,{labels:false});buildAttic(md==="attic"?AF+1.3:null);}buildRoof(md==="attic"?AF+1.3:null);}
   /* szobalámpák csak belső nézetben: kívülről nézve nincsenek a jelenetben, így nem kerülnek semmibe */
-  if(md!=="closed"&&md!=="attic")roomLamps(H.interior&&H.interior.lights,FL,FL+H.levels.ceiling,full,above);
-  if(md==="walk"||md==="attic")roomLamps(H.attic&&H.attic.lights,AF,null,md==="walk",h=>md==="attic"&&h>AF+1.3);
+  if(md!=="closed"&&md!=="attic")roomLamps(H.interior&&H.interior.lights,FL,FL+H.levels.ceiling,full,above,"g");
+  if(md==="walk"||md==="attic")roomLamps(H.attic&&H.attic.lights,AF,null,md==="walk",h=>md==="attic"&&h>AF+1.3,"a");
   updateInfo();mergeGroup(house);buildFurniture();applySun();}
 
 /* ---------- belső tér a feltöltött alaprajz szerint ---------- */
@@ -1623,7 +1634,7 @@ function buildSite(){[street,garden,context].forEach(clearGroup);const st=H.site
       [[-0.17,-0.17],[0.17,-0.17],[-0.17,0.17],[0.17,0.17]].forEach(l=>box(q[0]+l[0]-0.02,y0,q[1]+l[1]-0.02,q[0]+l[0]+0.02,y0+0.42,q[1]+l[1]+0.02,wood,garden));
       if(q[3])box(q[0]-0.2,y0+0.46,q[1]+q[3]*0.17,q[0]+0.2,y0+0.88,q[1]+q[3]*0.2,wood,garden);else box(q[0]+q[2]*0.17,y0+0.46,q[1]-0.2,q[0]+q[2]*0.2,y0+0.88,q[1]+0.2,wood,garden);});}
   /* fűcsomók a pázsiton */
-  const areas=st.lawn||[];if(areas.length){const tot=areas.reduce((a,r)=>a+(r[2]-r[0])*(r[3]-r[1]),0),N=Math.round(tot*11);
+  const areas=st.lawn||[];if(areas.length){const tot=areas.reduce((a,r)=>a+(r[2]-r[0])*(r[3]-r[1]),0),N=Math.round(tot*(PHONE?5:11));
     const im=new THREE.InstancedMesh(tuft.geo.clone(),tuft.mat,N),o=new THREE.Object3D(),base=CL("#9DBA6A").multiplyScalar(FOLIAGE);let k=0;
     areas.forEach(r=>{const n=Math.round(N*(r[2]-r[0])*(r[3]-r[1])/tot);for(let i=0;i<n&&k<N;i++,k++){o.position.set(r[0]+rnd()*(r[2]-r[0]),0,r[1]+rnd()*(r[3]-r[1]));o.rotation.set(0,rnd()*Math.PI,0);const sc=0.55+rnd()*0.5;o.scale.set(sc,sc*(0.55+rnd()*0.35),sc);o.updateMatrix();im.setMatrixAt(k,o.matrix);im.setColorAt(k,base.clone().offsetHSL((rnd()-0.5)*0.03,0,(rnd()-0.5)*0.12));}});
     im.count=k;im.receiveShadow=true;garden.add(im);AOHIDE.add(im);}
@@ -1672,7 +1683,7 @@ function applySun(rebuildEnv){const LAT=(H.meta.lat??46)*Math.PI/180,ROT=(H.meta
   scene.fog.color.setRGB(0.80,0.85,0.89).lerp(new THREE.Color(0.89,0.78,0.66),low*0.6*day).lerp(new THREE.Color(0.10,0.13,0.19),1-day);
   const night=1-day;MS.glass.emissiveIntensity=night*(WK.on?0:1.4);walkFill.intensity=WK.on?(0.18+night*0.3)*LI:0;scene.environmentIntensity=WK.on?0.5:1;   /* belül az égbolt fénye nem jut be mindenhonnan: kevesebb égfény, meleg derítés */MS.curtain.emissiveIntensity=night*0.55;MS.lamp.emissiveIntensity=night*3;nightLights.forEach(l=>l.intensity=night*2.4*LI);
   /* belső nézetben, ha sötét van, égnek a szobák lámpái (a fények száma csak a kapcsoláskor változik) */
-  const lit=night>0.05;roomLights.forEach(l=>{l.visible=lit;l.intensity=night*l.userData.k*9*LI;});MS.fixture.emissiveIntensity=lit?night*2.2:0;
+  const lit=night>0.05,onLv=PHONE&&WK.on?(WK.y>AF-0.3?"a":"g"):null;roomLights.forEach(l=>{l.visible=lit&&(!onLv||l.userData.lv===onLv);l.intensity=night*l.userData.k*9*LI;});MS.fixture.emissiveIntensity=lit?night*2.2:0;
   if(FM)FM.led.emissiveIntensity=lit&&S.mode!=="closed"?0.6+night*2.4:0.6;
   if(rebuildEnv!==false){if(envRT)envRT.dispose();envRT=pmrem.fromScene(envScene,0.02);scene.environment=envRT.texture;}
   const hh=Math.floor(hr),mm=Math.round((hr-hh)*60),t=`${hh}:${String(mm).padStart(2,"0")}`;
@@ -1880,7 +1891,7 @@ function walkStep(dt){const k=WK.keys;let f=(k.KeyW||k.ArrowUp||k.fw?1:0)-(k.Key
     if(!ok)WK.target=null;moved=moved||ok;}
   if(Math.abs(WK.y-WK.ys)>0.002){WK.ys+=(WK.y-WK.ys)*Math.min(1,dt*9);moved=true;}
   camera.position.set(WK.x,WK.ys+1.62,WK.z);camera.rotation.set(WK.pitch,WK.yaw,0,"YXZ");
-  if(moved){const lv=WK.y>AF-0.3?"Tetőtér":WK.y>FL-0.1&&pipt(H.walls.map(w=>w.a),WK.x,WK.z)?"Földszint":"Kert";const el=document.getElementById("walkfloor");if(el.textContent!==lv)el.textContent=lv;}
+  if(moved){const lv=WK.y>AF-0.3?"Tetőtér":WK.y>FL-0.1&&pipt(H.walls.map(w=>w.a),WK.x,WK.z)?"Földszint":"Kert";const el=document.getElementById("walkfloor");if(el.textContent!==lv){el.textContent=lv;if(PHONE&&roomLights.length)applySun(false);}}
   return moved;}
 function glassWalk(on){MS.glass.transparent=on;MS.glass.opacity=on?0.2:1;MS.glass.depthWrite=!on;MS.glass.needsUpdate=true;}
 function enterWalk(){if(WK.on)return;cancelPlace();SEL=null;if(tctl)tctl.detach();syncFurnUI();WK.prev={mode:S.mode,p:camera.position.clone(),t:controls.target.clone(),fov:camera.fov};WK.on=true;S.mode="walk";goal=null;
