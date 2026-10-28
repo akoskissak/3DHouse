@@ -387,7 +387,7 @@ const DEFAULT_HOUSE={
    ["Bejárat, kelet","110 × 230 cm, behúzott bejáratban, két lépcsőfokkal"],
    ["Lépcső, kelet","90 × 90 cm, parapet 145 cm, a pihenő szintjén; a felső éle egy vonalban a többi ablakéval (javaslat; a tervben 90 × 100 vagy 90 × 140)"],
    ["Nyugati oldal","kamra 60 × 70, mosókonyha 70 × 70, fürdő 80 × 70 cm, parapet 160 cm, a felső élük egy vonalban a többi ablakéval (javaslat; a tervben parapet 182 cm)"],
-   ["Hálószobák, dél","2 db 160 × 140 cm + 20, parapet 92 cm"],["Tetőtér, oromfalak","észak és dél: 160 × 130 cm + 15, parapet 80 cm"],
+   ["Hálószobák, dél","2 db 180 × 140 cm + 20, parapet 92 cm (javaslat: a tervben 160 cm széles, a több fényért szélesítve)"],["Tetőtér, oromfalak","észak és dél: 160 × 130 cm + 15, parapet 80 cm"],
    ["Tetőtéri fürdő","tetőablak a nyugati tetősíkon, a terven „k. prozor 140x200” jelöléssel; a rajzolt körvonal csak kb. 55 × 60 cm, ezért a méretet egyeztetni kell"]],
   notes:["A ház, a terasz, a nyílászárók, a magassági pontok és a telek a feltöltött tervek szerint. A ház tengelye kb. 6°-kal tér el kelet felé az északi iránytól; a napjárás ezzel és kb. 46° északi szélességgel számolt.",
    "Feltételezés: a tetőtér belső elrendezése (a terv csak a helyiségeket sorolja fel), a terasz fedése (a terv csak a három oszlopot mutatja), a tetőablak mérete, a kerítések és kapuk kialakítása, valamint a homlokzati anyagok és színek."]},
@@ -399,7 +399,7 @@ const DEFAULT_HOUSE={
  /* nyílászárók: a fal kezdőpontjától mért távolság (from–to), parapet és felső él a padlótól, redőnytok magassága (box) */
  openings:[
   {wall:"N",from:1.06,to:2.06,sill:1.00,head:2.30,type:"window"},{wall:"N",from:3.34,to:5.84,sill:0,head:2.30,type:"slide"},
-  {wall:"S",from:6.15,to:7.75,sill:0.92,head:2.32,box:0.20,type:"window"},{wall:"S",from:1.46,to:3.06,sill:0.92,head:2.32,box:0.20,type:"window"},
+  {wall:"S",from:6.05,to:7.85,sill:0.92,head:2.32,box:0.20,type:"window"},{wall:"S",from:1.36,to:3.16,sill:0.92,head:2.32,box:0.20,type:"window"},
   {wall:"W",from:8.55,to:9.15,sill:1.60,head:2.30,type:"window"},{wall:"W",from:6.63,to:7.33,sill:1.60,head:2.30,type:"window"},{wall:"W",from:4.41,to:5.21,sill:1.60,head:2.30,type:"window"},
   {wall:"E1",from:2.34,to:4.34,sill:0.90,head:2.30,box:0.20,type:"window"},{wall:"E2",from:0.75,to:1.65,sill:1.45,head:2.35,box:0.15,type:"window"},
   {wall:"ER",from:0.21,to:1.31,sill:0,head:2.30,type:"front"},
@@ -497,12 +497,12 @@ const DEFAULT_HOUSE={
    /* hálószoba */
    {model:"fm_bed",at:[1.45,10.6],rot:90},{model:"fm_sidetable",at:[0.62,9.5]},{model:"fm_sidetable",at:[0.62,11.7]},
    {model:"potted_plant_04",at:[0.62,11.7],y0:0.5},{kind:"wardrobe",rect:[3.74,9.93,4.35,12.18],face:"W",y:[0,2.3]},{kind:"art",rect:[0.37,10.2,0.4,11.0],face:"E",y:[1.2,2.0],v:1},{kind:"rug",rect:[1.9,9.5,3.4,11.7],color:"#E2DDD3"},
-   {kind:"radiator",rect:[1.55,12.07,2.95,12.17],face:"N",y:[0.12,0.72]},
+   {kind:"radiator",rect:[1.45,12.07,3.05,12.17],face:"N",y:[0.12,0.72]},
    /* gyerekszoba: egyszemélyes ágy a keleti fal mellett, íróasztal az ablak alatt (a radiátor előtt), gardrób a nyugati falon, könyvespolc az ajtó mellett */
    {kind:"bed",rect:[6.78,9.02,8.83,10.22],face:"W"},{kind:"art",rect:[8.8,9.22,8.83,10.02],face:"W",y:[1.2,1.9],v:2},{model:"fm_sidetable",at:[8.58,10.5]},
    {kind:"wardrobe",rect:[4.58,10.3,5.2,12.18],face:"E",y:[0,2.3],oak:true},{model:"fm_bookshelf",at:[6.0,9.2]},
    {model:"fm_desk",at:[6.94,11.75],rot:180},{model:"fm_ochair",at:[6.94,11.15],rot:180},{model:"desk_lamp_arm_01",at:[7.45,11.87],y0:0.76,rot:200},
-   {kind:"radiator",rect:[6.24,12.07,7.64,12.17],face:"N",y:[0.12,0.72]},
+   {kind:"radiator",rect:[6.14,12.07,7.74,12.17],face:"N",y:[0.12,0.72]},
    {kind:"rug",rect:[5.5,10.2,6.6,11.1],color:"#C9D3DA"}],
   /* szobák lámpái (fix: ceiling mennyezeti, pendant függő, wall fali, none csak fény, ha a lámpatest bútorként már megvan); y a padlótól, r a hatótáv, i a fényerő szorzója */
   lights:[
